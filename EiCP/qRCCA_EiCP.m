@@ -91,6 +91,6 @@ while currentIter <  maxIter
 end
 runningTime = toc;
 
-objValue = log(x'*A*x)-log(x'*B*x);
+objValue = log( quadFormA / quadFormB );
 end
 

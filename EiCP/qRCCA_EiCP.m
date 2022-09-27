@@ -44,7 +44,6 @@ currentIter = 1;
 
 objDiff = ones(k,1);
 
-objDiffPlot = [];
 while currentIter <  maxIter
     J = randperm(n,q);
     xJ = x(J);
@@ -78,10 +77,9 @@ while currentIter <  maxIter
 
     linA = linA + z_A; linB = linB + z_B;
     
-    obj = log(quadFormA)-log(quadFormB);
+    % track the objective increase
+    obj = log(quadFormA/quadFormB);
     objDiff(mod(currentIter,k)+1) = obj - objOld;
-    
-    objDiffPlot = [objDiffPlot; obj - objOld];
     objOld = obj;
     
     
@@ -93,7 +91,6 @@ while currentIter <  maxIter
 end
 runningTime = toc;
 
-plot(objDiffPlot)
 objValue = log(x'*A*x)-log(x'*B*x);
 end
 

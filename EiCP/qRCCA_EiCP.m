@@ -22,8 +22,8 @@ tic
 n = size(A,2);
 
 x = (1/n) * ones(n,1);
-quadFormA = x'*A*x; quadFormB = x'*B*x;
 linA = A*x; linB = B*x;
+quadFormA = x'*linA; quadFormB = x'*linB;
 
 
 defaultopt = mskoptimset;

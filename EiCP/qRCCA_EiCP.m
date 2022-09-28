@@ -1,15 +1,19 @@
-function [runningTime, objValue, x] = qRCCA_EiCP(A,B,q,maxIter,k,eps)
+function [runningTime, objValue, x] = qRCCA_EiCP(A,B,q,M,T,eps)
 % Implementation of the qRCCA algorithm for EiCP.
 % Lennart Sinjorgo & Renata Sotirov
+
+
 
 % EiCP:
 % minimize: log(x'Ax) - log(x'Bx),
 % subject to: sum(x) = 1, x \geq 0
 
+% inputs:
 % matrices A and B are sparse, symmetric, nonnegative and have positive
-% diagonal
-
+% diagonal.
 % Each step, select q coordinates (uniformly random) to update.
+% M is maximum number of iterations
+% STOP iterations in iteration m if (obj now) - (obj at step m-T) < eps
 
 % For the QP:
 % max f(u)  = NablaF (u - xJ) - L/2 * || u - xJ ||^2
@@ -25,7 +29,7 @@ x = (1/n) * ones(n,1);
 linA = A*x; linB = B*x;
 quadFormA = x'*linA; quadFormB = x'*linB;
 
-
+% Set up MOSEK Parameters
 defaultopt = mskoptimset;
 options = mskoptimset(defaultopt,[]);
 [cmd,~,param] = msksetup(1,options);
@@ -40,19 +44,27 @@ onesVector = prob.bux';
 objOld = log(quadFormA)-log(quadFormB);
 
 
-currentIter = 1;
+m = 1;
 
-objDiff = ones(k,1);
+% structures to check the stopping criteria
+T = T+1; % matlab starts counting at 0.
+objMatrix = -ones(1,T);
+objMatrix(1) = objOld;
 
-while currentIter <  maxIter
+while m <  M
     J = randperm(n,q);
     xJ = x(J);
     
     % compute Lipschitz constant
-    L = 2*(quickNormEst(A(J,J),q)/quadFormA + quickNormEst(B(J,J),q)/quadFormB );    
+    if q < 15
+        % norm of full matrix is faster than normest for smaller matrices
+        L = 2*(norm(full(A(J,J)))/quadFormA + norm(full(A(J,J))) / quadFormB );
+    else
+        L = 2*(quickNormEst(A(J,J),q)/quadFormA + quickNormEst(B(J,J),q)/quadFormB );    
+    end
 
     % compute partial derivatives
-    NablaF = 2 * ( linA(J,:) / quadFormA - linB(J,:) / quadFormB );
+    NablaF = 2 * ( linA(J) / quadFormA - linB(J) / quadFormB );
     
     % Set MOSEK parameters
     sum_xJ = sum(xJ);
@@ -72,25 +84,26 @@ while currentIter <  maxIter
     % update the variables tracking Ax, x'Ax, Bx, x'Bx
     z_A = A(:,J)*dJ; 
     z_B = B(:,J)*dJ;
-    quadFormA = quadFormA + 2*dJ'*linA(J) + dJ'*z_A(J,:);
-    quadFormB = quadFormB + 2*dJ'*linB(J) + dJ'*z_B(J,:);
+    quadFormA = quadFormA + 2*dJ'*linA(J) + dJ'*z_A(J);
+    quadFormB = quadFormB + 2*dJ'*linB(J) + dJ'*z_B(J);
 
     linA = linA + z_A; linB = linB + z_B;
     
-    % track the objective increase
+    % track the objective
     obj = log(quadFormA/quadFormB);
-    objDiff(mod(currentIter,k)+1) = obj - objOld;
-    objOld = obj;
-    
-    
-    currentIter = currentIter+1;
-    
-    if sum(objDiff) < eps
+
+    modCounter1 = mod(m,T)+1;
+    modCounter2 = mod(m+1,T)+1;
+    objMatrix(1,modCounter1) = obj;
+
+    if objMatrix(1,modCounter1)-objMatrix(1,modCounter2) < eps
+        % objective has not increased with more than epsilon over the last
+        % T iterations.
         break;
     end
+    m = m+1;
 end
 runningTime = toc;
 
-objValue = log( quadFormA / quadFormB );
+objValue = obj;
 end
-

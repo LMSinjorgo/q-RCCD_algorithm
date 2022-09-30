@@ -1,5 +1,4 @@
-function [runningTime, objValue, x] = qRCCA_DkS(A,q,k,M,T,eps)
-rng(123)
+function [runningTime, objValue, x] = qRCCA_DkS(A,q,k,M,T,eps,x)
 % Implementation of the qRCCA algorithm for 
 % the continuous relaxation of DkS (densest k subgraph problem).
 % Lennart Sinjorgo & Renata Sotirov
@@ -10,6 +9,7 @@ rng(123)
 % of a graph
 
 % Each step, select q coordinates (uniformly random) to update.
+% input x: starting point
 
 % For the QP:
 % max f(u)  = NablaF (u - xJ) - L/2 * || u - xJ ||^2
@@ -22,7 +22,12 @@ tic
 n = size(A,2);
 
 % initial feasible starting point
-x = (k/n) * ones(n,1);
+if isempty(x)
+    x = (k/n) * ones(n,1);
+end
+
+
+
 linA = A*x;
 quadForm = x'*linA;
 
@@ -44,8 +49,12 @@ m = 1;
 % compute Lipschitz constant
 L = full(max(sum(A,2)));
 stagCounter = 1;
-fprintf("  Iter \t obj Value \n");
-fprintf("  0    \t %.3f \n",quadForm);
+%fprintf("  Iter \t obj Value \n");
+%fprintf("  0    \t %.3f \n",quadForm);
+
+G = [eye(q) - (1/q)*ones(q), (1/q)*ones(q,1)];
+
+
 while m < M
     J = randperm(n,q);
     xJ = x(J);
@@ -55,11 +64,53 @@ while m < M
     
     % compute parameters
     sum_xJ = sum(xJ);
-    linearCoeff = NablaF + L * xJ;
+    linearCoeff = NablaF/L + xJ;
+
+    uJ = G * [linearCoeff; sum_xJ];
+    if any(uJ < 0)
+        break;
+    end
+
+     % compute dJ and the next iterate of x
+    dJ = uJ - xJ;
+    x(J) = uJ;
+    
+    % update the variables tracking Ax, x'Ax, Bx, x'Bx
+    z_A = A(:,J)*dJ; 
+    
+    quadForm = quadForm + 2*dJ'*linA(J) + dJ'*z_A(J,:);
+    linA = linA + z_A;
+    
+    % track the objective increase
+    if (quadForm - objOld) < eps
+        stagCounter = stagCounter+1;
+        if stagCounter > T
+            break;
+        end
+    else
+        stagCounter = 0;
+    end
+    
+    objOld = quadForm;
+    
+    m = m+1;
+    %fprintf("  %g    \t %.3f \n",m,quadForm);
+end
+
+while m < M
+    J = randperm(n,q);
+    xJ = x(J);
+
+    % compute partial derivatives
+    NablaF = 2 * linA(J,:);
+    
+    % compute parameters
+    sum_xJ = sum(xJ);
+    linearCoeff = - NablaF - L * xJ;
     
     % Set MOSEK parameters
     prob.qoval = L * onesVector;
-    prob.c = -(linearCoeff);
+    prob.c = linearCoeff;
     prob.blc = sum_xJ;
     prob.buc = sum_xJ;
 
@@ -90,7 +141,7 @@ while m < M
     objOld = quadForm;
     
     m = m+1;
-    fprintf("  %g    \t %.3f \n",m,quadForm);
+    %fprintf("  %g    \t %.3f \n",m,quadForm);
 end
 runningTime = toc;
 

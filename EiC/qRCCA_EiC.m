@@ -1,20 +1,20 @@
-function [runningTime, objValue, x] = qRCCA_EiC(A,B,q,M)
+function [runningTime, objValue, x] = qRCCA_EiC(A,B,q,M,eps)
 % Implementation of the qRCCA algorithm for EiC.
-% Lennart Sinjorgo & Renata Sotirov
-
-% inputs:
+% Lennart Sinjorgo & Renata Sotirov, 2022
+%
+% INPUTS:
 % A,B: symmetric sparse matrices with positive diagonal
 % Density of these matrices should be low, to ensure a fast run time
-
 % q: number of coordinates to update simultaneously
-
-% M: Number of iterations to run (no other stopping criteria)
-
-
+% M: Number of maximum iterations to run
+% eps: if an improvement in objective function is less than epsilon, stop
+% iterating
+%
+% Outputs are obvious.
+%
 % EiC:
 % minimize: log(x'Ax) - log(x'Bx),
 % subject to: sum(x) = 1, x \geq 0
-
 % In each step, we solve a QP for the update:
 % max f(u)  = NablaF (u - xJ) - L/2 * || u - xJ ||^2
 %           = NablaF *u - L/2 * (u'u - 2u'x)      + Constants
@@ -22,6 +22,25 @@ function [runningTime, objValue, x] = qRCCA_EiC(A,B,q,M)
 %           = 0.5 u'*( -L*I )*u + c'u                  + Constants
 % s.t. aJ * uJ = aJ * xJ
 
+% input checking
+if ~issymmetric(A)
+    error("Matrix A is not symmetric!");
+end
+if ~issymmetric(B)
+    error("Matrix B is not symmetric!");
+end
+if ~issparse(A)
+    error("Matrix A is not sparse!");
+end
+if ~issparse(B)
+    error("Matrix B is not sparse!");
+end
+if any(A < 0)
+    error("matrix A contains a negative entry!");
+end
+if any(B < 0)
+    error("matrix B contains a negative entry!");
+end
 tic
 n = size(A,2);
 
@@ -56,6 +75,14 @@ M = M+1;
 % store the diagonals for faster indexing
 diagA = full(diag(A));
 diagB = full(diag(B));
+
+% additional input checking
+if any(diagA <= 0)
+    error("Matrix A has nonpositive diagonal.");
+end
+if any(diagB <= 0)
+    error("Matrix B has nonpositive diagonal.");
+end
 
 % linIdxC and linIdxR are used for linear indexing of matrices A and B
 linIdxC = repelem(1:(q-1),(q-1):-1:1);
@@ -114,6 +141,7 @@ while m <  M
 
     % find the off diagonal elements in A_J
     offDiagA = A(idx);
+    objOld = objValue;
     % if there are none, then we only need the diagonal entries of A
     if nnz(offDiagA) == 0
         quadFormA = quadFormA + 2*z_A*dJ'+dSquared * diagA(J);
@@ -134,11 +162,11 @@ while m <  M
         quadFormB = quadFormB + 2*z_B*dJ'+dSquared * diagB(J) + 2*offDiagB*outerProd(sIdx);    
     end
     
-    
+    objValue = log(quadFormA/quadFormB);
+    if abs(objValue - objOld) < eps
+        break;
+    end
     m = m+1;
 end
 runningTime = toc;
-
-% output objective value
-objValue = log(quadFormA/quadFormB);
 end

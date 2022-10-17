@@ -1,5 +1,5 @@
 # qRCCA-algorithm
-By A. Ghaffari-Hadigheh, L. Sinjorgo, and R. Sotirov (2022)
+## By A. Ghaffari-Hadigheh, L. Sinjorgo, and R. Sotirov (2022)
 
 Implementation of the $q$ RCCA algorithm, for solving problems of the form
 $$\max  f(x)$$ 

@@ -8,6 +8,8 @@ $$\text{subject to: } a'x = b, \text{ } l \leq x \leq u,$$
 where $f$ is a differentiable, possibly non-convex, function. In each iteration, we randomly choose $q$ coordinates of $x$ (uniform probability).
 Then, based on a convex approximation of $f$, we solve a simple quadratic programme on the selected variables, and update $x$ accordingly.
 
+This repository contains implementations of the $q$-RCCD algorithm, applied to the densest $k$-subgraph (\text{D}k\text{S}) problem, and the eigenvalue complementarity (EiC) problem.
+
 More details and a convergence analysis are provided in our paper.
 
 

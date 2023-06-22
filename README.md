@@ -11,9 +11,11 @@ Then, based on a convex approximation of $f$, we solve a easy quadratic programm
 More details and a convergence analysis are provided in our paper.
 
 
-% On convergence of a q-random coordinate constrained algorithm for non-convex problems (2023)
-% By:
-% A. Ghaffari-Hadigheh (Azarbaijan Shahid Madani University, Tabriz, Iran)
-% L. Sinjorgo (EOR Department, Tilburg University, The Netherlands)
-%           corresponding author: l.m.sinjorgo@tilburguniversity.edu
-% R. Sotirov (EOR Department, Tilburg University, The Netherlands)
+```
+@article{ghaffari2023convergence,
+  title={On convergence of a $q$-random coordinate constrained algorithm for non-convex problems},
+  author={Ghaffari-Hadigheh, Alireza and Sinjorgo, Lennart and Sotirov, Renata},
+  journal={arXiv preprint arXiv:2210.09665},
+  year={2023}
+}
+```

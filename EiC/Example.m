@@ -18,7 +18,7 @@ maxIter = Inf;
 A = generateMatrix(n,d);
 B = generateMatrix(n,d);
 
-% Provide no feasible starting point (qRCCD algorithm will pick scaled all
+% Provide no feasible starting point (q-RCCD algorithm will pick scaled all
 % ones vector)
 xStart = [];
 
@@ -26,7 +26,7 @@ xStart = [];
 [objValue, x,iterCount] = qRCCD_EiC(A,B,q,maxTime,maxIter,xStart);
 
 % check if x is a stationairy point
-% Requires YALMIP
+% (Requires YALMIP)
 % (For M \approx 0, runTime should be approx 2/3 minutes)
 M_tilde = computeM_EiC(A,B,x);
 

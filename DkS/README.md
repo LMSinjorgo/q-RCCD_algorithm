@@ -1,7 +1,10 @@
-Implementation of the $q$-RCCD algorithm on the densest $k$-subgraph (D $k$ S) problem.  See the file $\texttt{Example.m}$ for more information.
+Implementation of the $q$-RCCD algorithm on the densest $k$-subgraph ($\text{D} k \text{S}$) problem.  See the file $\texttt{Example.m}$ for more information.
 
 The algorithm contained in $\texttt{fullProj.m}$ is adapted from:
-Wang, Weiran, and Canyi Lu. "Projection onto the capped simplex." arXiv preprint arXiv:1503.01002 (2015).
+
+  Wang, Weiran, and Canyi Lu. "Projection onto the capped simplex." arXiv preprint arXiv:1503.01002 (2015).
+
+See below:
 ```
 @article{wang2015projection,
   title={Projection onto the capped simplex},

@@ -1,4 +1,4 @@
-# q-RCCD algorithm
+# $q$-RCCD algorithm
 ## By A. Ghaffari-Hadigheh, L. Sinjorgo, and R. Sotirov (2023)
 
 Implementation of the $q$-RCCD algorithm, for solving problems of the form

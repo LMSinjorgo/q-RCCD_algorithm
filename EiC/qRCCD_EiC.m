@@ -6,7 +6,7 @@ function [objValue, x,iterCount] = qRCCD_EiC(A,B,q,maxTime,maxIter,x)
 %           corresponding author: l.m.sinjorgo@tilburguniversity.edu
 % R. Sotirov (EOR Department, Tilburg University, The Netherlands)
 %
-% Implementation of the q-RCCD algorithm for the DkS problem
+% Implementation of the q-RCCD algorithm for the EiC problem
 %
 % Inputs:
 % A,B: symmetric sparse matrices with positive diagonal

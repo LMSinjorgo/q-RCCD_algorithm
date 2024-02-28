@@ -147,7 +147,7 @@ while toc <  maxTime && iterCount < maxIter
 
     % update the variables tracking x'*A*x and x'*B*x
     quadFormB = quadFormB + 2*(z_B*dJ)+ dJ'*subB*dJ; 
-    quadFormA = quadFormA + 2*(z_A*dJ) +dJ'*subB*dJ;        
+    quadFormA = quadFormA + 2*(z_A*dJ) +dJ'*subA*dJ;      
 
     iterCount=iterCount+1;
 end
